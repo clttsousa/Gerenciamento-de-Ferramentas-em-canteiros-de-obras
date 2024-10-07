@@ -6,25 +6,31 @@
         :is="currentComponent"
         @switch-to-register="showRegister"
         @switch-to-login="showLogin"
+        @login-success="handleLoginSuccess"
       />
     </transition>
+    <AppDashboard v-if="isLoggedIn" :username="username" @logout="handleLogout" />
   </div>
 </template>
 
 <script>
 import LoginForm from './components/LoginForm.vue'; 
 import RegisterForm from './components/Register.vue';
+import AppDashboard from './components/AppDashboard.vue'; // Corrigido para AppDashboard
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 export default {
   name: 'App',
   components: {
     LoginForm,
-    RegisterForm
+    RegisterForm,
+    AppDashboard // Corrigido para AppDashboard
   },
   data() {
     return {
-      currentComponent: 'LoginForm'
+      currentComponent: 'LoginForm',
+      isLoggedIn: false, // Estado de login
+      username: ''       // Armazena o nome do usuário
     };
   },
   methods: {
@@ -33,6 +39,16 @@ export default {
     },
     showLogin() {
       this.currentComponent = 'LoginForm';
+    },
+    handleLoginSuccess(username) {
+      this.username = username; // Armazena o nome do usuário logado
+      this.isLoggedIn = true;   // Atualiza o estado de login
+      this.currentComponent = ''; // Limpa o componente atual, se necessário
+    },
+    handleLogout() {
+      this.isLoggedIn = false; // Atualiza o estado de login
+      this.username = '';       // Limpa o nome do usuário
+      this.currentComponent = 'LoginForm'; // Retorna ao LoginForm
     }
   }
 };

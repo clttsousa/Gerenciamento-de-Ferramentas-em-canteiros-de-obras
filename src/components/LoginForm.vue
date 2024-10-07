@@ -5,28 +5,14 @@
         <h2 class="text-center mb-4">Login</h2>
         <form @submit.prevent="handleLogin">
           <div class="mb-3">
-            <label for="username" class="form-label">Usuário ou Email</label>
-            <input
-              type="text"
-              v-model="login"
-              class="form-control"
-              id="login"
-              placeholder="Digite seu usuário ou email"
-              required
-              @focus="clearError"
-            />
+            <label for="login" class="form-label">Usuário ou Email</label>
+            <input type="text" v-model="login" class="form-control" id="login" placeholder="Digite seu usuário ou email"
+              required @focus="clearError" />
           </div>
           <div class="mb-3">
             <label for="password" class="form-label">Senha</label>
-            <input
-              type="password"
-              v-model="password"
-              class="form-control"
-              id="password"
-              placeholder="Digite sua senha"
-              required
-              @focus="clearError"
-            />
+            <input type="password" v-model="password" class="form-control" id="password" placeholder="Digite sua senha"
+              required @focus="clearError" />
           </div>
           <button type="submit" class="btn btn-primary w-100">Entrar</button>
           <p v-if="errorMessage" class="text-danger mt-3">{{ errorMessage }}</p>
@@ -41,6 +27,7 @@
 
 <script>
 import axios from 'axios';
+import { useToast } from 'vue-toastification'; // Importando o useToast
 
 export default {
   name: 'LoginForm',
@@ -51,6 +38,12 @@ export default {
       errorMessage: ''
     };
   },
+  setup() {
+    const toast = useToast(); // Instanciando o toast
+
+    // Retornando o toast para uso em métodos
+    return { toast };
+  },
   methods: {
     async handleLogin() {
       try {
@@ -60,8 +53,10 @@ export default {
         });
 
         if (response.data.success) {
-          alert('Login realizado com sucesso!');
+          localStorage.setItem('userId', response.data.userId); // Salvar o ID do usuário
+          this.$emit('login-success', response.data.username);
         }
+        this.toast.success(`Login realizado com sucesso`)
       } catch (error) {
         this.errorMessage = error.response?.data?.message || 'Erro ao fazer login';
         console.error(error);
@@ -78,12 +73,11 @@ export default {
 </script>
 
 <style scoped>
-
 .card {
-  width: 400px; 
-  max-width: 90%; 
-  margin: 0 auto; 
-  padding: 2rem; 
+  width: 400px;
+  max-width: 90%;
+  margin: 0 auto;
+  padding: 2rem;
   border-radius: 15px;
   background-color: rgba(255, 255, 255, 0.8);
   transition: transform 0.3s;

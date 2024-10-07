@@ -53,6 +53,7 @@
 
 <script>
 import axios from 'axios';
+import { useToast } from 'vue-toastification'; 
 
 export default {
   name: 'RegisterForm',
@@ -63,6 +64,10 @@ export default {
       password: '',
       errorMessage: '',
     };
+  },
+  setup() {
+    const toast = useToast(); 
+    return { toast }; 
   },
   methods: {
     clearError() {
@@ -77,7 +82,8 @@ export default {
         });
 
         if (response.status === 201) {
-          alert('Usuário cadastrado com sucesso!');
+          // Emitir notificação de sucesso
+          this.toast.success('Usuário cadastrado com sucesso!'); // Adicione esta linha
           this.switchToLogin();
         }
       } catch (error) {
@@ -93,7 +99,6 @@ export default {
 </script>
 
 <style scoped>
-
 .card {
   width: 400px; 
   max-width: 90%; 

@@ -9,11 +9,15 @@ const UserSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
-    unique: true, 
+    unique: true,
   },
   password: {
     type: String,
     required: true,
+  },
+  profileImage: {
+    type: String,  // Armazenar a URL da imagem ou os dados em base64
+    default: '',   // Define um valor padrão para quando o usuário não tiver uma imagem
   },
 });
 
