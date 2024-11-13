@@ -9,14 +9,14 @@
         @login-success="handleLoginSuccess"
       />
     </transition>
-    <AppDashboard v-if="isLoggedIn" :username="username" @logout="handleLogout" />
+    <AppDashboard v-if="isLoggedIn" :username="username" :userId="userId" @logout="handleLogout" />
   </div>
 </template>
 
 <script>
 import LoginForm from './components/LoginForm.vue'; 
 import RegisterForm from './components/Register.vue';
-import AppDashboard from './components/AppDashboard.vue'; // Corrigido para AppDashboard
+import AppDashboard from './components/AppDashboard.vue'; 
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 export default {
@@ -24,13 +24,14 @@ export default {
   components: {
     LoginForm,
     RegisterForm,
-    AppDashboard // Corrigido para AppDashboard
+    AppDashboard 
   },
   data() {
     return {
       currentComponent: 'LoginForm',
-      isLoggedIn: false, // Estado de login
-      username: ''       // Armazena o nome do usuário
+      isLoggedIn: false, 
+      username: '',
+      userId: '' // Adicione esta propriedade para armazenar o ID do usuário
     };
   },
   methods: {
@@ -40,15 +41,19 @@ export default {
     showLogin() {
       this.currentComponent = 'LoginForm';
     },
-    handleLoginSuccess(username) {
-      this.username = username; // Armazena o nome do usuário logado
-      this.isLoggedIn = true;   // Atualiza o estado de login
-      this.currentComponent = ''; // Limpa o componente atual, se necessário
+    handleLoginSuccess(username, userId) {
+      console.log('Login bem-sucedido:', username, userId);
+      this.username = username; 
+      this.userId = userId; // Armazena o ID do usuário ao fazer login
+      console.log('User ID armazenado:', this.userId);
+      this.isLoggedIn = true;   
+      this.currentComponent = ''; 
     },
     handleLogout() {
-      this.isLoggedIn = false; // Atualiza o estado de login
-      this.username = '';       // Limpa o nome do usuário
-      this.currentComponent = 'LoginForm'; // Retorna ao LoginForm
+      this.isLoggedIn = false; 
+      this.username = '';       
+      this.userId = ''; // Reseta o ID do usuário ao fazer logout
+      this.currentComponent = 'LoginForm'; 
     }
   }
 };

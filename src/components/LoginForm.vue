@@ -52,11 +52,14 @@ export default {
           password: this.password,
         });
 
+        // Armazenar o token JWT no localStorage
+        localStorage.setItem('token', response.data.token); // Supondo que o token esteja retornando da API
+        
         if (response.data.success) {
           localStorage.setItem('userId', response.data.userId); // Salvar o ID do usuário
-          this.$emit('login-success', response.data.username);
+          this.$emit('login-success', response.data.username, response.data.userId);
         }
-        this.toast.success(`Login realizado com sucesso`)
+        this.toast.success(`Login realizado com sucesso`);
       } catch (error) {
         this.errorMessage = error.response?.data?.message || 'Erro ao fazer login';
         console.error(error);
