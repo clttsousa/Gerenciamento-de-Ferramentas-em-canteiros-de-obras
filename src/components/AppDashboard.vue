@@ -172,76 +172,114 @@
     </div>
   </div>
 
-<!-- Modal para exibir ferramentas da obra -->
-<div v-if="showObraToolsModal" class="modal fade show" tabindex="-1" role="dialog" style="display: block;">
-  <div class="modal-dialog modal-lg" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Ferramentas de {{ selectedObra ? selectedObra.name : '' }}</h5>
-        <button @click="closeObraToolsModal" type="button" class="close" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <!-- Tabela para listar ferramentas -->
-        <table class="table table-striped">
-          <thead>
-            <tr>
-              <th>Nome</th>
-              <th>Quantidade</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="tool in obraTools" :key="tool._id">
-              <td>{{ tool.name }}</td>
-              <td>{{ tool.quantity }}</td>
-              <td>
-                <button @click="removeToolFromObra(tool._id)" class="btn btn-danger btn-sm">Remover</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="modal-footer">
-        <!-- Botão para adicionar uma nova ferramenta -->
-        <button @click="openAddToolToObraModal" class="btn btn-primary">Adicionar Ferramenta</button>
-        <button @click="closeObraToolsModal" class="btn btn-secondary">Fechar</button>
-      </div>
-    </div>
-  </div>
-</div>
+  <!-- Modal para exibir ferramentas da obra ou depósito -->
+  <div v-if="showObraToolsModal" class="modal fade show" tabindex="-1" role="dialog" style="display: block;">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Ferramentas de {{ selectedObra ? selectedObra.name : 'Depósito' }}</h5>
+          <button @click="closeObraToolsModal" type="button" class="close" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <!-- Tabela para listar ferramentas -->
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Quantidade</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="tool in obraTools" :key="tool._id">
+                <td>{{ tool.name }}</td>
+                <td>{{ tool.quantity }}</td>
+                <td>
+                  <!-- Botão para remover a ferramenta -->
+                  <button @click="removeToolFromObra(tool._id)" class="btn btn-danger btn-sm">Remover</button>
 
-<!-- Modal para adicionar uma nova ferramenta à obra -->
-<div v-if="showAddToolToObraModal" class="modal fade show" tabindex="-1" role="dialog" style="display: block;">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Adicionar Ferramenta à Obra</h5>
-        <button @click="closeAddToolToObraModal" type="button" class="close" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <form @submit.prevent="addToolToObra">
-          <div class="form-group">
-            <input v-model="newTool.name" placeholder="Nome da ferramenta" class="form-control" required />
-          </div>
-          <div class="form-group">
-            <input v-model="newTool.description" placeholder="Descrição" class="form-control" />
-          </div>
-          <div class="form-group">
-            <input type="number" v-model.number="newTool.quantity" placeholder="Quantidade" min="1" class="form-control" required />
-          </div>
-          <button type="submit" class="btn btn-success">Adicionar Ferramenta</button>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button @click="closeAddToolToObraModal" class="btn btn-secondary">Cancelar</button>
+                  <!-- Botão para enviar a ferramenta para outra obra ou depósito -->
+                  <button @click="openSendToolModal(tool)" class="btn btn-secondary btn-sm">Enviar</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="modal-footer">
+          <!-- Botão para adicionar uma nova ferramenta -->
+          <button @click="openAddToolToObraModal" class="btn btn-primary">Adicionar Ferramenta</button>
+          <button @click="closeObraToolsModal" class="btn btn-secondary">Fechar</button>
+        </div>
       </div>
     </div>
   </div>
-</div>
+
+  <!-- Modal para enviar a ferramenta para outra obra ou depósito -->
+  <div v-if="showSendToolModal" class="modal fade show" tabindex="-1" role="dialog" style="display: block;">
+    <div class="modal-dialog modal-sm" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Enviar Ferramenta</h5>
+          <button @click="closeSendToolModal" type="button" class="close" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>Escolha para onde enviar a ferramenta:</p>
+          <select v-model="selectedDestination" class="form-control" @change="setDestinationType">
+            <option value="deposito">Depósito</option>
+            <option v-for="obra in obrasList" :key="obra._id" :value="obra._id">
+              {{ obra.name }}
+            </option>
+          </select>
+
+          <div class="mt-3">
+            <label for="quantity">Quantidade</label>
+            <input type="number" v-model="selectedQuantity" min="1" :max="selectedToolQuantity" class="form-control" />
+            <small>Máximo disponível: {{ selectedToolQuantity }}</small>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button @click="sendToolToDestination" class="btn btn-success">Enviar</button>
+          <button @click="closeSendToolModal" class="btn btn-secondary">Cancelar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para adicionar uma nova ferramenta à obra -->
+  <div v-if="showAddToolToObraModal" class="modal fade show" tabindex="-1" role="dialog" style="display: block;">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Adicionar Ferramenta à Obra</h5>
+          <button @click="closeAddToolToObraModal" type="button" class="close" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form @submit.prevent="addToolToObra">
+            <div class="form-group">
+              <input v-model="newTool.name" placeholder="Nome da ferramenta" class="form-control" required />
+            </div>
+            <div class="form-group">
+              <input v-model="newTool.description" placeholder="Descrição" class="form-control" />
+            </div>
+            <div class="form-group">
+              <input type="number" v-model.number="newTool.quantity" placeholder="Quantidade" min="1"
+                class="form-control" required />
+            </div>
+            <button type="submit" class="btn btn-success">Adicionar Ferramenta</button>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button @click="closeAddToolToObraModal" class="btn btn-secondary">Cancelar</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Modal para Adicionar Obra -->
   <div v-if="showAddObraModal" class="modal fade show" tabindex="-1" role="dialog" style="display: block;">
@@ -301,7 +339,7 @@ export default {
       showDeposit: false,
       showAddObraModal: false,
       showObrasModal: false,
-      showAddToolToObraModal:false,
+      showAddToolToObraModal: false,
       newObra: {
         name: '',
         address: ''
@@ -320,6 +358,11 @@ export default {
         quantity: 1
       },
       tools: [],
+      selectedDestination: '',
+      selectedDestinationType: '',
+      obrasList: [],
+      selectedToolId: '',
+      showSendToolModal: false,
       isEditing: false,
       editingToolId: null,
       toDeleteToolId: null,
@@ -348,6 +391,53 @@ export default {
       this.closeAllModals();
       this.showAddObraModal = true;
     },
+    openSendToolModal(tool) {
+      this.selectedToolId = tool._id;
+      this.showSendToolModal = true;
+      this.selectedDestination = null;
+    },
+
+    closeSendToolModal() {
+      this.showSendToolModal = false;  // Esconde o modal de envio
+      this.selectedToolId = null;      // Limpa o ID da ferramenta selecionada
+      this.selectedDestination = null; // Limpa a seleção do destino
+    },
+
+    setDestinationType() {
+      // Verifica se o destino selecionado é 'deposito' ou uma obra
+      if (this.selectedDestination === 'deposito') {
+        this.selectedDestinationType = 'deposito';  // Define como depósito
+      } else {
+        this.selectedDestinationType = 'obra';  // Tipo de obra
+      }
+    },
+    async sendToolToDestination() {
+      if (!this.selectedDestination || !this.selectedDestinationType || !this.selectedQuantity) {
+        alert("Por favor, preencha todos os campos.");
+        return;
+      }
+
+      const payload = {
+        toolId: this.selectedToolId,
+        destinationId: this.selectedDestination === 'deposito' ? 'deposito' : this.selectedDestination,
+        destinationType: this.selectedDestinationType,
+        quantity: this.selectedQuantity
+      };
+
+      try {
+        const response = await axios.post('http://localhost:3000/api/works/move-tool', payload);
+        console.log(response.data.message);
+
+        // Atualize as ferramentas no frontend após o movimento
+        await this.fetchTools();  // Supondo que você tenha um método fetchTools para recarregar as ferramentas
+
+        this.closeSendToolModal();
+      } catch (error) {
+        console.error("Erro ao mover a ferramenta:", error);
+        alert('Erro ao mover a ferramenta');
+      }
+    },
+
     closeAddObraModal() {
       this.showAddObraModal = false;
       this.newObra = { name: '', address: '' };
@@ -405,11 +495,11 @@ export default {
       await this.fetchToolsFromObra(obra._id); // Carrega as ferramentas da obra
       this.showObraToolsModal = true;
     },
-    openAddToolToObraModal(){
+    openAddToolToObraModal() {
       this.showAddToolToObraModal = true;
       this.newTool = {};
     },
-    closeAddToolToObraModal(){
+    closeAddToolToObraModal() {
       this.showAddToolToObraModal = false;
     },
     closeObraToolsModal() {

@@ -157,4 +157,58 @@ router.delete("/:obraId/tools/:toolId", async (req, res) => {
     }
 });
 
+router.post('/move-tool', async (req, res) => {
+    const { toolId, destinationId, destinationType, quantity } = req.body;
+    
+    console.log("Recebido payload:", req.body); // Adiciona este log para debugar o payload enviado
+
+    try {
+        if (!toolId || !destinationId || !destinationType || !quantity) {
+            return res.status(400).json({ message: 'Dados inválidos' });
+        }
+
+        // Verifica a existência da ferramenta
+        const tool = await Tool.findById(toolId);
+        if (!tool) {
+            return res.status(404).json({ message: 'Ferramenta não encontrada' });
+        }
+
+        // Verifica a quantidade disponível
+        if (tool.depositoQuantity < quantity) {
+            return res.status(400).json({ message: 'Quantidade insuficiente no depósito' });
+        }
+
+        let destination;
+        if (destinationType === 'deposito') {
+            destination = 'deposito';
+            tool.depositoQuantity -= quantity;
+        } else if (destinationType === 'obra') {
+            if (!mongoose.Types.ObjectId.isValid(destinationId)) {
+                return res.status(400).json({ message: 'ID da obra inválido' });
+            }
+            destination = await Obra.findById(destinationId);
+            if (!destination) {
+                return res.status(404).json({ message: 'Obra não encontrada' });
+            }
+
+            const obraIndex = tool.obras.findIndex(obra => obra.obraId.toString() === destinationId);
+            if (obraIndex === -1) {
+                tool.obras.push({ obraId: destinationId, quantity });
+            } else {
+                tool.obras[obraIndex].quantity += quantity;
+            }
+        } else {
+            return res.status(400).json({ message: 'Tipo de destino inválido' });
+        }
+
+        // Salva a ferramenta no banco de dados
+        await tool.save();
+
+        return res.status(200).json({ message: 'Ferramenta movida com sucesso' });
+    } catch (error) {
+        console.error("Erro ao mover ferramenta:", error);
+        return res.status(500).json({ message: 'Erro interno no servidor' });
+    }
+});
+
 module.exports = router;

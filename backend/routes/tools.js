@@ -1,8 +1,9 @@
 const express = require("express");
-const User  = require("../models/User");
+const User = require("../models/User");
 const Tool = require("../models/Tool");
 const { authenticateJWT } = require("../middleware/auth");
 const router = express.Router();
+const Obra = require('../models/Work');
 
 // Middleware de autenticação
 router.use(authenticateJWT);
@@ -73,7 +74,7 @@ router.put("/:userId/tools/:toolId", authenticateJWT, async (req, res) => {
         if (name) tool.name = name;
         if (description) tool.description = description;
 
-        await user.save(); 
+        await user.save();
         res.status(200).json({
             message: "Ferramenta atualizada com sucesso",
             deposito: user.deposito,
